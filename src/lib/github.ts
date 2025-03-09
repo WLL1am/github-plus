@@ -48,13 +48,14 @@ export const pollCommits = async (projectId: string) => {
     }))
     const summaries = summaryResponses.map((response) => {
         if (response.status === 'fulfilled') {
-            return response.value
+            return response.value as string
         }
         return ""
     })
 
     const commits = await db.commit.createMany({
         data: summaries.map((summary, index) => {
+            console.log(`processing commit ${index}`)
             return {
                 projectId: projectId,
                 commitHash: unprocessedCommits[index]!.commitHash,
@@ -104,5 +105,3 @@ async function filterUnprocessedCommits(projectId: string, commitHashes: Respons
     const unprocessedCommits = commitHashes.filter((commit) => !processedCommits.some((processedCommit) => processedCommit.commitHash === commit.commitHash))
     return unprocessedCommits
 }
-
-pollCommits('cm7zouq0w000010d4dflyz2d6').then(console.log)
