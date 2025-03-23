@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { pollCommits } from "@/lib/github";
 import { indexGithubRepo } from "@/lib/github-loader";
+import { Input } from "postcss";
 
 
 export const projectRouter = createTRPCRouter({
@@ -61,5 +62,19 @@ export const projectRouter = createTRPCRouter({
                 userId: ctx.user.userId!
             }
         })
+    }),
+    getQuestions: protectedProcedure.input(z.object({ projectId: z.string() }))
+    .query(async ({ ctx, input}) => {
+         return await ctx.db.question.findMany({
+            where: {
+                projectId: input.projectId
+            },
+            include: {
+                user: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+         })
     })
 })
